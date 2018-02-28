@@ -75,7 +75,7 @@ rl
   }
 })
 .on('close', () => {
-  log('Adiós!');
+  log('Adios!');
   process.exit(0);
 });
 

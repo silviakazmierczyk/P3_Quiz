@@ -37,7 +37,7 @@ exports.listCmd = rl => {
 */
 exports.showCmd = (rl,id) => {
     if (typeof id === "undefined"){
-        errorlog(`Falta el parámetro id.`);
+        errorlog(`El parámetro id no es válido.`);
     }else{
         try{
             const quiz = model.getByIndex(id);
@@ -125,10 +125,12 @@ exports.testCmd = (rl,id) => {
             const quiz = model.getByIndex(id);
             rl.question(colorize(quiz.question + '? ', 'red') , response => {
                 if (response.toLowerCase().trim() === quiz.answer.toLocaleLowerCase().trim()){
-                    biglog('CORRECTA!', 'green');
+                    log('Su respuesta es correcta.');
+                    biglog('Correcta', 'green');
                     rl.prompt(); 
                 }else{
-                    biglog('INCORRECTA!', 'red');
+                    log('Su respuesta es incorrecta.');
+                    biglog('Incorrecta', 'red');
                     rl.prompt(); 
                 }
             });
@@ -154,8 +156,8 @@ exports.playCmd = rl => {
     }
      const playOne = () => {
        if (toBeResolved.length === 0){
-          log(` No hay más preguntas`);
-          log(` Examen finalizado con: ${score} puntos`);
+          log(`No hay nada más que preguntar.`);
+          log(`Fin del juego. Aciertos: ${score}`);
           biglog(score, 'magenta');
        }else{
           let id = Math.floor(Math.random()*(toBeResolved.length-1));
@@ -167,8 +169,9 @@ exports.playCmd = rl => {
                     log(` CORRECTO - Lleva ${score} aciertos`);
                     playOne(); //recursiva
                 }else{
-                    biglog('INCORRECTA!', 'red');
-                    log(` Su resultado ha sido: ${score} puntos`);
+                    log('INCORRECTO.');
+                    log(`Fin del juego. Aciertos: ${score} `);
+                    biglog(score, 'magenta');
                     rl.prompt();
                 }
             });
