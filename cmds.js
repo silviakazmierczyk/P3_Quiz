@@ -250,7 +250,49 @@ exports.playCmd = rl => {
 }
 */
     
-
+let score = 0; 
+    let toBeResolved = []; 
+    const playOne = () => {
+        return new Sequelize.Promise((resolve,reject) => { 
+            if(toBeResolved.length <=0){ 
+                console.log("No hay nada más que preguntar."); 
+                console.log("Fin del examen. Aciertos:"); 
+                resolve(); 
+                biglog(score, 'magenta'); 
+               return; 
+            } 
+            let id = Math.floor(Math.random()*toBeResolved.length); 
+            let quiz = toBeResolved[id];
+            toBeResolved.splice(id,1); 
+            makeQuestion(rl, colorize(quiz.question + '? ', 'red')) 
+            .then(response => { 
+                if(response.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){ 
+                    score++; 
+                    console.log("CORRECTO - Lleva ",score, "aciertos"); 
+                    resolve(playOne()); 
+                } else {
+                    console.log("INCORRECTO."); 
+                   console.log("Fin del examen. Aciertos:"); 
+                    resolve(); 
+                    biglog(score, 'magenta'); 
+                }    
+            }) 
+}) 
+    } 
+    models.quiz.findAll({raw: true}) 
+    .then(quizzes => { 
+        toBeResolved = quizzes; 
+      }) 
+    .then(() => { 
+       return playOne(); 
+    }) 
+    .catch(error => { 
+        console.log(error); 
+    }) 
+    .then(() => { 
+        rl.prompt(); 
+    }) 
+};
 
 
 
