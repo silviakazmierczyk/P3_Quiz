@@ -219,7 +219,7 @@ exports.testCmd = (rl,id) => {
 * Se gana si se contesta a todos satisfactoriamente.
 */
 
-/*exports.playCmd = rl => {
+exports.playCmd = rl => {
     let score = 0;
     var i;
     let toBeResolved = new Array(model.count());
@@ -252,7 +252,7 @@ exports.testCmd = (rl,id) => {
         };
         playOne();
 }
-*/
+
 
 
 
