@@ -135,16 +135,16 @@ exports.editCmd = (rl, id) => {
    .then(id => models.quiz.findById(id))
    .then(quiz => {
      if (!quiz){
-       throw new Error(`Ǹo existe un quiz asociado al id=${id}.`);
+       throw new Error(`No existe un quiz asociado al id=${id}.`);
      }
      process.stdout.isTTY && setTimeout(() => {rl.write(quiz.question)}, 0);
      return makeQuestion(rl, ' Introduzca la pregunta: ')
      .then(q => {
        process.stdout.isTTY && setTimeout(() => {rl.write(quiz.answer)}, 0);
        return makeQuestion(rl, 'Introduzca la respuesta ')
-       .then(a => {
+       .then(r => {
          quiz.question = q;
-         quiz.answer = a;
+         quiz.answer = r;
          return quiz;
        });
      });
@@ -177,16 +177,12 @@ exports.testCmd = (rl,id) => {
      if (!quiz){
        throw new Error(`Ǹo existe un quiz asociado al id=${id}.`);
          }
-         
-    process.stdout.isTTY && setTimeout(() => {rl.write(quiz.question)}, 0);
-        
-    log(`[${colorize(quiz.id,'magenta')}]: ${quiz.question}: `);
-     
-    return makeQuestion(rl, ' Introduzca la respuesta: ')
     
-    .then(a => {
+    log(`[${colorize(quiz.id,'magenta')}]: ${quiz.question}: `);
+    return makeQuestion(rl, ' Introduzca la respuesta: ')
+    .then(r => {
 
-            if(quiz.answer.toUpperCase() === a.toUpperCase().trim()){
+            if(quiz.answer.toUpperCase().trim() === r.toUpperCase().trim()){
 
                 log("Su respuesta es correcta");
 
@@ -220,7 +216,7 @@ exports.testCmd = (rl,id) => {
 */
 
 exports.playCmd = rl => {
-    let score = 0;
+   /* let score = 0;
     var i;
     let toBeResolved = new Array(model.count());
     for (i = 0; i<toBeResolved.length; i++){
@@ -252,7 +248,50 @@ exports.playCmd = rl => {
         };
         playOne();
 }
-
+*/
+    let score = 0;
+    let toBeResolved = [];
+    const playOne = () => {
+        return new Sequelize.Promise((resolve,reject) => {
+            if(toBeResolved.length <=0){
+                console.log("No hay nada más que preguntar.");
+                console.log("Fin del examen. Aciertos:");
+                resolve();
+                biglog(score, 'magenta');
+                return;
+            }
+            let id = Math.floor(Math.random()*toBeResolved.length);
+            let quiz = toBeResolved[id];
+            toBeResolved.splice(id,1);
+            makeQuestion(rl, colorize(quiz.question + '? ', 'red'))
+            .then(response => {
+                if(response.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
+                    score++;
+                    console.log("CORRECTO - Lleva ",score, "aciertos");
+                    resolve(playOne());
+                } else {
+                    console.log("INCORRECTO.");
+                    console.log("Fin del examen. Aciertos:");
+                    resolve();
+                    biglog(score, 'magenta');
+                }   
+            })
+        })
+    }
+    models.quiz.findAll({raw: true})
+    .then(quizzes => {
+        toBeResolved = quizzes;
+    })
+    .then(() => {
+       return playOne();
+    })
+    .catch(error => {
+        console.log(error);
+    })
+    .then(() => {
+        rl.prompt();
+    })
+};
 
 
 
